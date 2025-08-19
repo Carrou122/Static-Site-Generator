@@ -1,7 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType
-
+from inline_markdown import split_nodes_delimiter
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
@@ -32,6 +32,29 @@ class TestTextNode(unittest.TestCase):
         node2 = TextNode("link", TextType.LINK, url="http://example.com")
         self.assertEqual(node1, node2)
 
+class TestDelimiter(unittest.TestCase):
+    def test_delimiter_code(self):
+        nodes = [TextNode("This is `code` and `more code`", TextType.TEXT)]
+        self.assertEqual(
+        split_nodes_delimiter(nodes, "`", TextType.CODE),
+        [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("code", TextType.CODE),
+            TextNode(" and ", TextType.TEXT),
+            TextNode("more code", TextType.CODE),
+        ])
+    
+    def test_delimiter_even(self):
+        nodes = [TextNode("This is `code and `more code`", TextType.TEXT)]
+        with self.assertRaises(Exception): 
+            split_nodes_delimiter(nodes, "`", TextType.CODE)
+
+    def test_delimiter_none(self):
+        nodes = [TextNode("This is code and more code", TextType.TEXT)]
+        self.assertEqual(
+        split_nodes_delimiter(nodes, "`", TextType.CODE),
+        [TextNode("This is code and more code", TextType.TEXT)]
+        )
 
 if __name__ == "__main__":
     unittest.main()
