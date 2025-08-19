@@ -1,6 +1,8 @@
 import unittest
 
 from htmlnode import HTMLNode, LeafNode, ParentNode
+from textnode import TextType, TextNode
+from main import text_node_to_html_node
 
 class TestHTMLNode(unittest.TestCase):
     def test_props_to_html_empty(self):
@@ -103,3 +105,46 @@ class TestParentNode(unittest.TestCase):
         node = ParentNode("a", [LeafNode(tag="b", value="Click me")], {"href": "https://boot.dev"})
         self.assertEqual(node.to_html(), '<a href="https://boot.dev"><b>Click me</b></a>')
 
+class TestMainFunction(unittest.TestCase):
+    def test_text(self):
+        node = TextNode("This is a text node", TextType.TEXT)
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, None)
+        self.assertEqual(html_node.value, "This is a text node")
+
+    def test_bold(self):
+        node = TextNode("Test node", TextType.BOLD)
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, "b")
+        self.assertEqual(html_node.value, "Test node")
+
+    def test_italic(self):
+        node = TextNode("Test node", TextType.ITALIC)
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, "i")
+        self.assertEqual(html_node.value, "Test node")
+
+    def test_code(self):
+        node = TextNode("Test node", TextType.CODE)
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, "code")
+        self.assertEqual(html_node.value, "Test node")
+
+    def test_link(self):
+        node = TextNode("Test node", TextType.LINK, "https://www.boot.dev")
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag,"a")
+        self.assertEqual(html_node.value, "Test node")
+        self.assertEqual(html_node.props,{"href": "https://www.boot.dev"} )
+
+    def test_image(self):
+        node = TextNode("Test node", TextType.IMAGE, "https://www.google.com")
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, "img")
+        self.assertEqual(html_node.value, "")
+        self.assertEqual(html_node.props, {"src": "https://www.google.com", "alt": "Test node"})
+    
+    def test_exception(self):
+        node = TextNode("Test node", "INVALID_TYPE")
+        with self.assertRaises(Exception):
+            text_node_to_html_node(node)
