@@ -2,9 +2,58 @@ from enum import Enum
 import re
 
 def markdown_to_blocks(markdown):
-    block = markdown.strip().split("\n\n")
-    f_block = list(filter(bool, map(str.strip, block)))
-    return f_block
+    lines = markdown.splitlines()
+    current = []
+    blocks = []
+    def is_heading(line):
+        return re.match(r"^#{1,6}\s", line) is not None
+    def is_unordered(line):
+        return re.match(r"^\s*-\s", line) is not None
+    def is_ordered(line):
+        return re.match(r"\s*\d+.\s", line) is not None
+    i = 0
+    n = len(lines)
+    while i < n:
+        line = lines[i]
+        if line.strip() == "":
+            if current:
+                blocks.append("\n".join(current))
+                current = []
+            i += 1
+            continue
+        if is_heading(line):
+            if current: 
+                blocks.append("\n".join(current)) 
+                current = []
+            blocks.append(line)
+            i += 1
+            continue
+        if is_unordered(line):
+            if current:
+                blocks.append("\n".join(current))
+                current = []
+            list_lines = []
+            while i < n and is_unordered(lines[i]):
+                list_lines.append(lines[i])
+                i += 1
+            blocks.append("\n".join(list_lines))
+            continue
+        if is_ordered(line):
+            if current:
+                blocks.append("\n".join(current))
+                current = []
+            list_lines = []
+            while i < n and is_ordered(lines[i]):
+                list_lines.append(lines[i])
+                i += 1
+            blocks.append("\n".join(list_lines))
+            continue
+        current.append(line)
+        i += 1
+    if current: 
+        blocks.append("\n".join(current))
+
+    return [b.strip() for b in blocks if b.strip()]
 
 class BlockType(Enum):
     PARAGRAPH = "paragraph"
