@@ -2,7 +2,8 @@ from textnode import TextNode, TextType
 from htmlnode import HTMLNode, LeafNode, ParentNode, text_node_to_html_node
 from block_markdown import *
 from inline_markdown import text_to_children
-import re
+from copystatic import copy_static
+import re 
 
 def markdown_to_html_node(markdown):
     blocks = markdown_to_blocks(markdown)
@@ -65,7 +66,7 @@ def convert_block_to_html_node(block, block_type):
 
 
 def main():
-    node = TextNode("This is some anchor text", TextType.LINK, "https://www.boot.dev")
-    print(node)
+    copy_static("static", "public")
 
-main()
+if __name__ == "__main__":
+    main()
